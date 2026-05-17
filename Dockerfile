@@ -1,10 +1,10 @@
-FROM rocm/rocm-ubuntu:24.04
+FROM registry.fedoraproject.org/fedora:rawhide
 
 # Base packages (keep compilers/headers for Triton JIT at runtime)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libdrm-dev python3.13 python3.13-dev git rsync libatomic1 bash ca-certificates curl \
-    gcc g++ binutils make git ffmpeg vim dialog \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN dnf -y install --setopt=install_weak_deps=False --nodocs \
+    libdrm-devel python3.13 python3.13-devel git rsync libatomic bash ca-certificates curl \
+    gcc gcc-c++ binutils make git ffmpeg-free vim dialog \
+    && dnf clean all && rm -rf /var/cache/dnf/*
 
 # Python venv
 RUN /usr/bin/python3.13 -m venv /opt/venv
@@ -26,9 +26,7 @@ COPY scripts/model_manager.py /opt/
 COPY workflows/API /opt/comfy-workflows
 
 # ROCm + PyTorch (Official Nightlies - page-aligned, original format)
-RUN python -m pip install \
-    --index-url https://download.pytorch.org/whl/nightly/rocm6.1 \
-    --pre torch[device-gfx1151] torchvision[device-gfx1151] torchaudio
+RUN python -m pip install --pre torch[device-gfx1151] torchvision[device-gfx1151] torchaudio --index-url https://rocm.nightlies.amd.com/whl-staging-multi-arch/ --force-reinstall
 
 WORKDIR /opt
 
@@ -70,7 +68,7 @@ RUN chmod -R a+rwX /opt && chmod +x /opt/*.sh || true && \
     find /opt/venv -type f -name "*.so" -exec strip -s {} + 2>/dev/null || true && \
     find /opt/venv -type d -name "__pycache__" -prune -exec rm -rf {} + && \
     python -m pip cache purge || true && rm -rf /root/.cache/pip || true && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    dnf clean all && rm -rf /var/cache/dnf/*
 
 # Enable torch TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL
 COPY scripts/01-rocm-envs.sh /etc/profile.d/01-rocm-envs.sh
