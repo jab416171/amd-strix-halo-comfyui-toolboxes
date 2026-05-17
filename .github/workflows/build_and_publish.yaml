@@ -9,7 +9,7 @@ on:
         default: "latest"
 
 env:
-  IMAGE_REPO: kyuz0/amd-strix-halo-comfyui
+  IMAGE_REPO: jab416171/amd-strix-halo-comfyui
   DOCKER_BUILDKIT: "1"
 
 jobs:
