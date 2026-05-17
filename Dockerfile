@@ -25,8 +25,11 @@ COPY scripts/collect_perf_logs.py /opt/
 COPY scripts/model_manager.py /opt/
 COPY workflows/API /opt/comfy-workflows
 
-# ROCm + PyTorch (Official Nightlies - page-aligned, original format)
-RUN python -m pip install --pre torch[device-gfx1151] torchvision[device-gfx1151] torchaudio --index-url https://rocm.nightlies.amd.com/whl-staging-multi-arch/ --force-reinstall
+
+# ROCm + PyTorch (TheRock, include torchaudio for resolver; remove later)
+RUN python -m pip install \
+    --index-url https://rocm.nightlies.amd.com/v2-staging/gfx1151 \
+    --pre torch torchaudio torchvision
 
 WORKDIR /opt
 
@@ -34,7 +37,7 @@ WORKDIR /opt
 RUN python -m pip install gguf transformers==4.56.2
 
 # ComfyUI
-RUN git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
+RUN git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI 
 WORKDIR /opt/ComfyUI
 RUN python -m pip install -r requirements.txt && \
     python -m pip install --prefer-binary \
@@ -48,9 +51,9 @@ COPY workflows/*.json /opt/ComfyUI/user/default/workflows/
 
 # ComfyUI plugins
 WORKDIR /opt/ComfyUI/custom_nodes
-RUN git clone --depth=1 https://github.com/cubiq/ComfyUI_essentials /opt/ComfyUI/custom_nodes/ComfyUI_essentials
-RUN git clone --depth=1 https://github.com/kyuz0/ComfyUI-AMDGPUMonitor /opt/ComfyUI/custom_nodes/ComfyUI-AMDGPUMonitor
-RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF /opt/ComfyUI/custom_nodes/ComfyUI-GGUF
+RUN git clone --depth=1 https://github.com/cubiq/ComfyUI_essentials /opt/ComfyUI/custom_nodes/ComfyUI_essentials 
+RUN git clone --depth=1 https://github.com/kyuz0/ComfyUI-AMDGPUMonitor /opt/ComfyUI/custom_nodes/ComfyUI-AMDGPUMonitor 
+RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF /opt/ComfyUI/custom_nodes/ComfyUI-GGUF 
 
 # Qwen Image Studio
 WORKDIR /opt
@@ -61,7 +64,7 @@ RUN git clone --depth=1 https://github.com/kyuz0/qwen-image-studio /opt/qwen-ima
 RUN git clone --depth=1 https://github.com/kyuz0/wan-video-studio /opt/wan-video-studio && \
     python -m pip install --prefer-binary \
     opencv-python-headless diffusers tokenizers accelerate \
-    imageio[ffmpeg] easydict ftfy dashscope imageio-ffmpeg decord librosa
+    imageio[ffmpeg] easydict ftfy dashscope imageio-ffmpeg decord librosa 
 
 # Permissions & trims (keep compilers/headers)
 RUN chmod -R a+rwX /opt && chmod +x /opt/*.sh || true && \
