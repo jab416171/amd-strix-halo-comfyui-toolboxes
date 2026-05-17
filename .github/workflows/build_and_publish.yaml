@@ -9,6 +9,7 @@ on:
         default: "dev"
 
 env:
+  IMAGE_REPO: jab416171/amd-strix-halo-comfyui
   DOCKER_BUILDKIT: "1"
 
 jobs:
