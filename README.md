@@ -218,3 +218,4 @@ Source: [Reddit Comment](https://www.reddit.com/r/LocalLLaMA/comments/1m9wcdc/co
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 sudo reboot
 ```
+
