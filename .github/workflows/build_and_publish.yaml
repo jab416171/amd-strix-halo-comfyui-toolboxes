@@ -9,7 +9,6 @@ on:
         default: "dev"
 
 env:
-  IMAGE_REPO: kyuz0/amd-strix-halo-comfyui
   DOCKER_BUILDKIT: "1"
 
 jobs:
@@ -92,7 +91,6 @@ jobs:
           provenance: false
           sbom: false
           no-cache: true
-
 
       # Free buildx cache on the VM after we’ve pushed
       - name: Prune buildx cache
