@@ -55,12 +55,14 @@ RUN git clone --depth=1 https://github.com/cubiq/ComfyUI_essentials /opt/ComfyUI
 RUN git clone --depth=1 https://github.com/kyuz0/ComfyUI-AMDGPUMonitor /opt/ComfyUI/custom_nodes/ComfyUI-AMDGPUMonitor 
 RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF /opt/ComfyUI/custom_nodes/ComfyUI-GGUF 
 
-# Permissions & trims (keep compilers/headers)
+# Permissions & trims (keep compilers/headers and installed shared libraries intact)
 RUN chmod -R a+rwX /opt && chmod +x /opt/*.sh || true && \
-    find /opt/venv -type f -name "*.so" -exec strip -s {} + 2>/dev/null || true && \
     find /opt/venv -type d -name "__pycache__" -prune -exec rm -rf {} + && \
     python -m pip cache purge || true && rm -rf /root/.cache/pip || true && \
     dnf clean all && rm -rf /var/cache/dnf/*
+
+# Catch incompatible or damaged PyTorch shared libraries before publishing an image.
+RUN python -c 'import torch; print(torch.__version__)'
 
 # Enable torch TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL
 COPY scripts/01-rocm-envs.sh /etc/profile.d/01-rocm-envs.sh
