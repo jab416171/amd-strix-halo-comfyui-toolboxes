@@ -20,9 +20,11 @@ COPY scripts/set_extra_paths.sh /opt/
 COPY scripts/get_qwen_image.sh /opt/
 COPY scripts/get_hunyuan15.sh /opt/
 COPY scripts/get_ltx2.sh /opt/
+COPY scripts/get_minimax_h3.sh /opt/
 COPY scripts/benchmark_workflows.py /opt/
 COPY scripts/collect_perf_logs.py /opt/
 COPY scripts/model_manager.py /opt/
+RUN chmod 0755 /opt/model_manager.py && ln -s /opt/model_manager.py /opt/venv/bin/model_manager
 COPY workflows/API /opt/comfy-workflows
 
 

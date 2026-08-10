@@ -9,7 +9,10 @@ from pathlib import Path
 # --- Configuration ---
 # Hardcoded paths for Docker environment
 SCRIPT_DIR = Path("/opt")
-WORKFLOW_DIR = Path("/opt/comfy-workflows")
+WORKFLOW_DIRS = (
+    Path("/opt/comfy-workflows"),
+    Path("/opt/ComfyUI/user/default/workflows"),
+)
 
 # --- Model Families Configuration ---
 # Group workflows by "Functionality". 
@@ -156,6 +159,41 @@ MODEL_FAMILIES = [
             }
         ]
     },
+
+    # --- MiniMax H3 ---
+    {
+        "name": "MiniMax H3 - Text to Video",
+        "keywords": ["minimax", "h3", "t2v"],
+        "script": "get_minimax_h3.sh",
+        "variants": [
+            {
+                "name": "T2V model + shared encoder and VAEs",
+                "args": ["common", "fl2va"]
+            }
+        ]
+    },
+    {
+        "name": "MiniMax H3 - Image to Video",
+        "keywords": ["minimax", "h3", "i2v"],
+        "script": "get_minimax_h3.sh",
+        "variants": [
+            {
+                "name": "I2V model + shared encoder and VAEs",
+                "args": ["common", "fl2va"]
+            }
+        ]
+    },
+    {
+        "name": "MiniMax H3 - Reference to Video",
+        "keywords": ["minimax", "h3", "r2v"],
+        "script": "get_minimax_h3.sh",
+        "variants": [
+            {
+                "name": "R2V model + shared encoder and VAEs",
+                "args": ["common", "ref2va"]
+            }
+        ]
+    },
 ]
 
 def check_dependencies():
@@ -180,14 +218,20 @@ def find_available_families():
     Scans workflow directory and identifies which Model Families are relevant 
     (i.e., we have workflows for them).
     """
-    if not WORKFLOW_DIR.exists():
-        run_dialog(["--msgbox", f"Error: Workflow directory not found at:\n{WORKFLOW_DIR}", "12", "60"])
+    workflow_dirs = [directory for directory in WORKFLOW_DIRS if directory.exists()]
+    if not workflow_dirs:
+        paths = "\n".join(str(directory) for directory in WORKFLOW_DIRS)
+        run_dialog(["--msgbox", f"Error: Workflow directories not found:\n{paths}", "12", "60"])
         sys.exit(1)
 
     available_families = []
     
     # Get all json filenames once
-    workflow_files = [f.name for f in WORKFLOW_DIR.glob("*.json")]
+    workflow_files = [
+        workflow.name
+        for directory in workflow_dirs
+        for workflow in directory.glob("*.json")
+    ]
     
     for family in MODEL_FAMILIES:
         # Check if ANY workflow matches this family's criteria
