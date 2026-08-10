@@ -26,15 +26,15 @@ COPY scripts/model_manager.py /opt/
 COPY workflows/API /opt/comfy-workflows
 
 
-# ROCm + PyTorch (TheRock, include torchaudio for resolver; remove later)
+# ROCm + PyTorch (TheRock multi-arch release, scoped to Strix Halo gfx1151)
 RUN python -m pip install \
-    --index-url https://rocm.nightlies.amd.com/v2-staging/gfx1151 \
-    --pre torch torchaudio torchvision
+    --index-url https://rocm.nightlies.amd.com/whl-multi-arch/ \
+    --pre "torch[device-gfx1151]" "torchvision[device-gfx1151]" torchaudio
 
 WORKDIR /opt
 
-# Pin specific transformers version
-RUN python -m pip install gguf transformers==4.56.2
+# Required by ComfyUI-GGUF
+RUN python -m pip install gguf
 
 # ComfyUI
 RUN git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI 
@@ -54,17 +54,6 @@ WORKDIR /opt/ComfyUI/custom_nodes
 RUN git clone --depth=1 https://github.com/cubiq/ComfyUI_essentials /opt/ComfyUI/custom_nodes/ComfyUI_essentials 
 RUN git clone --depth=1 https://github.com/kyuz0/ComfyUI-AMDGPUMonitor /opt/ComfyUI/custom_nodes/ComfyUI-AMDGPUMonitor 
 RUN git clone --depth=1 https://github.com/city96/ComfyUI-GGUF /opt/ComfyUI/custom_nodes/ComfyUI-GGUF 
-
-# Qwen Image Studio
-WORKDIR /opt
-RUN git clone --depth=1 https://github.com/kyuz0/qwen-image-studio /opt/qwen-image-studio && \
-    python -m pip install -r /opt/qwen-image-studio/requirements.txt
-
-# Wan Video Studio
-RUN git clone --depth=1 https://github.com/kyuz0/wan-video-studio /opt/wan-video-studio && \
-    python -m pip install --prefer-binary \
-    opencv-python-headless diffusers tokenizers accelerate \
-    imageio[ffmpeg] easydict ftfy dashscope imageio-ffmpeg decord librosa 
 
 # Permissions & trims (keep compilers/headers)
 RUN chmod -R a+rwX /opt && chmod +x /opt/*.sh || true && \
