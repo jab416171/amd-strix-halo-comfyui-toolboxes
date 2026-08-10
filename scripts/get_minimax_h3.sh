@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Downloads the open-weight MiniMax H3 model files for ComfyUI.
+# Downloads the open-weight MiniMax-H3 model files for ComfyUI.
 set -euo pipefail
 
 export HF_XET_HIGH_PERFORMANCE="${HF_XET_HIGH_PERFORMANCE:-1}"
@@ -9,13 +9,15 @@ HF="/opt/venv/bin/hf"
 MODEL_HOME="$HOME/comfy-models"
 STAGE="$MODEL_HOME/.hf_stage_minimax_h3"
 REPO="Comfy-Org/MiniMax-H3"
+TURBO_REPO="larryvrh/MiniMax-H3-Turbo-Lora"
 
-mkdir -p "$MODEL_HOME"/{text_encoders,vae,diffusion_models}
+mkdir -p "$MODEL_HOME"/{text_encoders,vae,diffusion_models,loras}
 mkdir -p "$STAGE"
 
 download_if_missing() {
   local remote="$1"
   local subdir="$2"
+  local repo="${3:-$REPO}"
   local destination="$MODEL_HOME/$subdir/$(basename "$remote")"
   local staged="$STAGE/$remote"
 
@@ -26,7 +28,7 @@ download_if_missing() {
 
   echo "↓ Downloading $(basename "$remote") → $destination"
   mkdir -p "$(dirname "$staged")"
-  "$HF" download "$REPO" "$remote" --repo-type model --local-dir "$STAGE"
+  "$HF" download "$repo" "$remote" --repo-type model --local-dir "$STAGE"
   mv -f "$staged" "$destination"
 }
 
@@ -38,6 +40,7 @@ Targets:
   common      Shared text encoder and video/audio VAEs
   fl2va       T2V and I2V diffusion model
   ref2va      Reference-to-video diffusion model
+  turbo       MiniMax-H3 Turbo LoRA (v4, step 600 EMA)
   all         All H3 models
 
 Maintenance:
@@ -57,6 +60,9 @@ case "${1:-}" in
     ;;
   ref2va)
     download_if_missing "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors" "diffusion_models"
+    ;;
+  turbo)
+    download_if_missing "minimax_h3_turbo_v4_step600_ema.safetensors" "loras" "$TURBO_REPO"
     ;;
   all)
     "$0" common
