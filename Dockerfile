@@ -37,7 +37,7 @@ WORKDIR /opt
 RUN python -m pip install gguf transformers==4.56.2
 
 # ComfyUI
-RUN git clone --depth=1 https://github.com/comfyanonymous/ComfyUI.git /opt/ComfyUI
+RUN git clone --depth=1 https://github.com/Comfy-Org/ComfyUI.git /opt/ComfyUI
 WORKDIR /opt/ComfyUI
 RUN python -m pip install -r requirements.txt && \
     python -m pip install -r manager_requirements.txt && \
